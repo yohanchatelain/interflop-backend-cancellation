@@ -37,15 +37,15 @@
 #include <sys/time.h>
 #include <unistd.h>
 
-#include "common/float_const.h"
-#include "common/float_struct.h"
-#include "common/float_utils.h"
-#include "common/logger.h"
-#include "common/options.h"
-#include "common/rng/vfc_rng.h"
-#include "interflop.h"
+#include "interflop-stdlib/common/float_const.h"
+#include "interflop-stdlib/common/float_struct.h"
+#include "interflop-stdlib/common/float_utils.h"
+#include "interflop-stdlib/common/options.h"
+#include "interflop-stdlib/interflop.h"
+#include "interflop-stdlib/interflop_stdlib.h"
+#include "interflop-stdlib/iostream/logger.h"
+#include "interflop-stdlib/rng/vfc_rng.h"
 #include "interflop_cancellation.h"
-#include "interflop_stdlib.h"
 
 /* define default environment variables and default parameters */
 #define TOLERANCE_DEFAULT 1
