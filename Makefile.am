@@ -9,7 +9,7 @@ libinterflop_cancellation_la_CFLAGS += -Wall -Wextra
 endif
 libinterflop_cancellation_la_LDFLAGS = -lm
 libinterflop_cancellation_la_LIBADD = @INTERFLOP_STDLIB_PATH@/lib/libinterflop_rng.la
-if BUILD_INTERFLOP_STDLIB
+if LINK_INTERFLOP_STDLIB
 libinterflop_cancellation_la_LIBADD += @INTERFLOP_STDLIB_PATH@/lib/libinterflop_stdlib.la
 endif
 library_includedir =$(includedir)/
