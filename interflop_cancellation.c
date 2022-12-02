@@ -27,7 +27,6 @@
 
 #include <argp.h>
 #include <err.h>
-#include <errno.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -157,12 +156,13 @@ static struct argp_option options[] = {
 static error_t parse_opt(int key, char *arg, struct argp_state *state) {
   cancellation_context_t *ctx = (cancellation_context_t *)state->input;
   char *endptr;
+  int error = 0;
   switch (key) {
   case 't':
     /* tolerance */
-    errno = 0;
-    int val = strtol(arg, &endptr, 10);
-    if (errno != 0 || val < 0) {
+    error = 0;
+    int val = interflop_strtol(arg, &endptr, &error);
+    if (error != 0 || val < 0) {
       logger_error("--tolerance invalid value provided, must be a"
                    "positive integer.");
     } else {
@@ -173,10 +173,10 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
     _set_warning(true, ctx);
     break;
   case 's':
-    errno = 0;
+    error = 0;
     ctx->choose_seed = 1;
-    ctx->seed = strtoull(arg, &endptr, 10);
-    if (errno != 0) {
+    ctx->seed = interflop_strtol(arg, &endptr, &error);
+    if (error != 0) {
       logger_error("--seed invalid value provided, must be an integer");
     }
     break;
