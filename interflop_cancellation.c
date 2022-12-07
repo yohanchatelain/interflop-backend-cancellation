@@ -46,20 +46,36 @@
 #include "interflop-stdlib/rng/vfc_rng.h"
 #include "interflop_cancellation.h"
 
-/* define default environment variables and default parameters */
-#define TOLERANCE_DEFAULT 1
-#define WARNING_DEFAULT 0
+/* Disable thread safety for RNG required for Valgrind */
+#ifdef RNG_THREAD_SAFE
+#define TLS __thread
+#else
+#define TLS
+#endif
 
 #define max(a, b) ((a) > (b) ? (a) : (b))
 
-static void _set_tolerance(int tolerance, void *context) {
+static void _set_cancellation_tolerance(int tolerance, void *context) {
   cancellation_context_t *ctx = (cancellation_context_t *)context;
   ctx->tolerance = tolerance;
 }
 
-static void _set_warning(bool warning, void *context) {
+static void _set_cancellation_warning(bool warning, void *context) {
   cancellation_context_t *ctx = (cancellation_context_t *)context;
   ctx->warning = warning;
+}
+
+static void _set_cancellation_seed(uint64_t seed, cancellation_context_t *ctx) {
+  ctx->seed = seed;
+  ctx->choose_seed = true;
+}
+
+const char *INTERFLOP_CANCELLATION_API(get_backend_name)(void) {
+  return "cancellation";
+}
+
+const char *INTERFLOP_CANCELLATION_API(get_backend_version)(void) {
+  return "1.x-dev";
 }
 
 /* global thread identifier */
@@ -67,7 +83,19 @@ static pid_t global_tid = 0;
 
 /* helper data structure to centralize the data used for random number
  * generation */
-static __thread rng_state_t rng_state;
+static TLS rng_state_t rng_state;
+/* copy */
+static TLS rng_state_t __rng_state;
+
+/* Function used by Verrou to save the */
+/* current rng state and replace it by the new seed */
+void cancellation_push_seed(uint64_t seed) {
+  __rng_state = rng_state;
+  _init_rng_state_struct(&rng_state, true, seed, false);
+}
+
+/* Function used by Verrou to restore the copied rng state */
+void cancellation_pop_seed() { rng_state = __rng_state; }
 
 /* noise = rand * 2^(exp) */
 static inline double _noise_binary64(const int exp, rng_state_t *rng_state) {
@@ -157,6 +185,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
   cancellation_context_t *ctx = (cancellation_context_t *)state->input;
   char *endptr;
   int error = 0;
+  uint64_t seed = -1;
   switch (key) {
   case 't':
     /* tolerance */
@@ -166,19 +195,19 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
       logger_error("--tolerance invalid value provided, must be a"
                    "positive integer.");
     } else {
-      _set_tolerance(val, ctx);
+      _set_cancellation_tolerance(val, ctx);
     }
     break;
   case 'w':
-    _set_warning(true, ctx);
+    _set_cancellation_warning(true, ctx);
     break;
   case 's':
     error = 0;
-    ctx->choose_seed = 1;
-    ctx->seed = interflop_strtol(arg, &endptr, &error);
+    seed = interflop_strtol(arg, &endptr, &error);
     if (error != 0) {
       logger_error("--seed invalid value provided, must be an integer");
     }
+    _set_cancellation_seed(seed, ctx);
     break;
   default:
     return ARGP_ERR_UNKNOWN;
@@ -200,11 +229,19 @@ void INTERFLOP_CANCELLATION_API(CLI)(int argc, char **argv, void *context) {
   }
 }
 
+void INTERFLOP_CANCELLATION_API(configure)(cancellation_conf_t conf,
+                                           void *context) {
+  cancellation_context_t *ctx = (cancellation_context_t *)context;
+  _set_cancellation_tolerance(conf.tolerance, ctx);
+  _set_cancellation_warning(conf.warning, ctx);
+  _set_cancellation_seed(conf.seed, ctx);
+}
+
 static void init_context(cancellation_context_t *ctx) {
-  ctx->choose_seed = 0;
-  ctx->seed = 0ULL;
-  ctx->warning = WARNING_DEFAULT;
-  ctx->tolerance = TOLERANCE_DEFAULT;
+  ctx->choose_seed = false;
+  ctx->seed = CANCELLATION_SEED_DEFAULT;
+  ctx->warning = CANCELLATION_WARNING_DEFAULT;
+  ctx->tolerance = CANCELLATION_TOLERANCE_DEFAULT;
 }
 
 #define CHECK_IMPL(name)                                                       \
