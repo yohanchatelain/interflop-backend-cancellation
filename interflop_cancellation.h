@@ -55,7 +55,8 @@ void INTERFLOP_CANCELLATION_API(fma_float)(float a, float b, float c,
                                            float *res, _u_ void *context);
 void INTERFLOP_CANCELLATION_API(fma_double)(double a, double b, double c,
                                             double *res, _u_ void *context);
-
+void INTERFLOP_CANCELLATION_API(cast_double_to_float)(double a, float *b,
+                                                      _u_ void *context);
 void INTERFLOP_CANCELLATION_API(configure)(cancellation_conf_t conf,
                                            void *context);
 void INTERFLOP_CANCELLATION_API(CLI)(int argc, char **argv, void *context);

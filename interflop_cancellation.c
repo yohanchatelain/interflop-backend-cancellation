@@ -185,6 +185,11 @@ void INTERFLOP_CANCELLATION_API(fma_double)(double a, double b, double c,
   *res = fmaApprox(a, b, c);
 }
 
+void INTERFLOP_CANCELLATION_API(cast_double_to_float)(double a, float *b,
+                                                      _u_ void *context) {
+  *b = (float)a;
+}
+
 #undef _u_
 static struct argp_option options[] = {
     {"tolerance", 't', "TOLERANCE", 0, "Select tolerance (TOLERANCE >= 0)", 0},
@@ -306,7 +311,8 @@ INTERFLOP_CANCELLATION_API(init)(void *context) {
     interflop_mul_double : INTERFLOP_CANCELLATION_API(mul_double),
     interflop_div_double : INTERFLOP_CANCELLATION_API(div_double),
     interflop_cmp_double : NULL,
-    interflop_cast_double_to_float : NULL,
+    interflop_cast_double_to_float :
+        INTERFLOP_CANCELLATION_API(cast_double_to_float),
     interflop_fma_float : INTERFLOP_CANCELLATION_API(fma_float),
     interflop_fma_double : INTERFLOP_CANCELLATION_API(fma_double),
     interflop_enter_function : NULL,
