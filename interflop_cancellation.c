@@ -40,6 +40,7 @@
 #include "interflop-stdlib/common/float_struct.h"
 #include "interflop-stdlib/common/float_utils.h"
 #include "interflop-stdlib/common/options.h"
+#include "interflop-stdlib/fma/fmaqApprox.h"
 #include "interflop-stdlib/interflop.h"
 #include "interflop-stdlib/interflop_stdlib.h"
 #include "interflop-stdlib/iostream/logger.h"
@@ -174,6 +175,16 @@ void INTERFLOP_CANCELLATION_API(div_double)(double a, double b, double *res,
   *res = a / b;
 }
 
+void INTERFLOP_CANCELLATION_API(fma_float)(float a, float b, float c,
+                                           float *res, _u_ void *context) {
+  *res = fmaApprox(a, b, c);
+}
+
+void INTERFLOP_CANCELLATION_API(fma_double)(double a, double b, double c,
+                                            double *res, _u_ void *context) {
+  *res = fmaApprox(a, b, c);
+}
+
 #undef _u_
 static struct argp_option options[] = {
     {"tolerance", 't', "TOLERANCE", 0, "Select tolerance (TOLERANCE >= 0)", 0},
@@ -296,8 +307,8 @@ INTERFLOP_CANCELLATION_API(init)(void *context) {
     interflop_div_double : INTERFLOP_CANCELLATION_API(div_double),
     interflop_cmp_double : NULL,
     interflop_cast_double_to_float : NULL,
-    interflop_fma_float : NULL,
-    interflop_fma_double : NULL,
+    interflop_fma_float : INTERFLOP_CANCELLATION_API(fma_float),
+    interflop_fma_double : INTERFLOP_CANCELLATION_API(fma_double),
     interflop_enter_function : NULL,
     interflop_exit_function : NULL,
     interflop_user_call : NULL,

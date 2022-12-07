@@ -13,7 +13,9 @@ endif
 if RNG_THREAD_SAFE
 libinterflop_cancellation_la_CFLAGS += -DRNG_THREAD_SAFE
 endif
-libinterflop_cancellation_la_LIBADD = @INTERFLOP_STDLIB_PATH@/lib/libinterflop_rng.la
+libinterflop_cancellation_la_LIBADD = \
+    @INTERFLOP_STDLIB_PATH@/lib/libinterflop_rng.la \
+    @INTERFLOP_STDLIB_PATH@/lib/libinterflop_fma.la
 if LINK_INTERFLOP_STDLIB
 libinterflop_cancellation_la_LIBADD += @INTERFLOP_STDLIB_PATH@/lib/libinterflop_stdlib.la
 endif
