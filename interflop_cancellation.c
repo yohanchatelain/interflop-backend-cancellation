@@ -40,7 +40,7 @@
 #include "interflop-stdlib/common/float_struct.h"
 #include "interflop-stdlib/common/float_utils.h"
 #include "interflop-stdlib/common/options.h"
-#include "interflop-stdlib/fma/fmaqApprox.h"
+#include "interflop-stdlib/fma/interflop_fma.h"
 #include "interflop-stdlib/interflop.h"
 #include "interflop-stdlib/interflop_stdlib.h"
 #include "interflop-stdlib/iostream/logger.h"
@@ -177,12 +177,12 @@ void INTERFLOP_CANCELLATION_API(div_double)(double a, double b, double *res,
 
 void INTERFLOP_CANCELLATION_API(fma_float)(float a, float b, float c,
                                            float *res, _u_ void *context) {
-  *res = fmaApprox(a, b, c);
+  *res = interflop_fma_binary32(a, b, c);
 }
 
 void INTERFLOP_CANCELLATION_API(fma_double)(double a, double b, double c,
                                             double *res, _u_ void *context) {
-  *res = fmaApprox(a, b, c);
+  *res = interflop_fma_binary64(a, b, c);
 }
 
 void INTERFLOP_CANCELLATION_API(cast_double_to_float)(double a, float *b,
